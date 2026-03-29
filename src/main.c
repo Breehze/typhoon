@@ -7,8 +7,9 @@
 #include <poll.h>
 #include <pty.h>
 #include <termios.h>
+#include <stdio.h>
 
-#include "shell/bsh.h"
+#include "shell/typhoon.h"
 #include "shell/parser/types.h"
 
 #include "networking/utils/utils.h"
@@ -80,6 +81,7 @@ int main() {
 
                 if(read_b <= 0){
                     conn->remove = 1;
+                    printf("Someone disconnected\n");
                     continue;
                 }
 

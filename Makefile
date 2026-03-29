@@ -10,7 +10,7 @@ SRCS := $(shell find $(SRC_DIR) -name "*.c")
 # Convert .c files to .o files in the build directory
 OBJS := $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
 
-TARGET := bsh
+TARGET := typhoon
 
 .PHONY: all clean rebuild
 

@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -11,6 +12,7 @@
 #include "parser.h"
 
 void execute_pipe(ASTnode* node);
+
 
 void run_process(char ** tokenized_bin,Error *err){
     int master_fd;
@@ -28,6 +30,29 @@ void run_process(char ** tokenized_bin,Error *err){
     waitpid(pid,NULL,0);
 }
 
+void execute_commnad(char ** tokenized_path,Error *err){
+    if(!tokenized_path || *tokenized_path == NULL){
+        if(err){ *err = SOME_ERROR; }
+        return;
+    }
+    if(strcmp(*tokenized_path,"help") == 0){
+        printf("This shell belongs to Boris\n");
+        return;
+    }else if(strcmp(*tokenized_path,"quit") == 0){
+        exit(0);
+        return;
+    }else if(strcmp(*tokenized_path,"halt") == 0){
+        //signal to parent to killitself
+    }else if(strcmp(*tokenized_path,"cd") == 0){
+        if(tokenized_path[1] == NULL){
+            return;
+        }
+        chdir(tokenized_path[1]);
+        return;
+    }
+
+    run_process(tokenized_path, err);
+}
 
 void execute_ast(ASTnode *node) {
     if (node == NULL) return;
@@ -44,7 +69,7 @@ void execute_ast(ASTnode *node) {
             break;
 
         case COMMAND:
-            run_process(node->command,NULL);
+            execute_commnad(node->command,NULL);
             break;
     }
 }
