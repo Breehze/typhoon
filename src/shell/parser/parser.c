@@ -1,7 +1,42 @@
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "types.h"
+#include "parser.h"
+
+void print_ast(ASTnode *node, int indent) {
+    if (node == NULL) {
+        return;
+    }
+
+    for (int i = 0; i < indent; i++) {
+        printf("  ");
+    }
+
+    switch (node->type) {
+        case COMMAND:
+            printf("COMMAND:");
+            for (int i = 0; node->command[i] != NULL; i++) {
+                printf(" %s", node->command[i]);
+            }
+            printf("\n");
+            break;
+        case PIPE:
+            printf("PIPE\n");
+            print_ast(node->left, indent + 1);
+            print_ast(node->right, indent + 1);
+            break;
+        case LIST:
+            printf("LIST\n");
+            print_ast(node->left, indent + 1);
+            print_ast(node->right, indent + 1);
+            break;
+        default:
+            printf("UNKNOWN NODE TYPE\n");
+            break;
+    }
+}
 
 
 char * peek(char ** token_stream){
@@ -45,7 +80,7 @@ ASTnode * spawn_command_node(char ** command){
 
 
 ASTnode * parse_command(char *** token_stream){
-    char ** whole_command = (char **)malloc(64 * sizeof(char *));
+    char ** whole_command = (char **)malloc(20 * sizeof(char *));
     int i = 0;
     
     while(peek(*token_stream) != NULL && strcmp(peek(*token_stream),"|") != 0 && strcmp(peek(*token_stream),";") != 0){
@@ -78,4 +113,16 @@ ASTnode * parse_list(char *** token_stream){
         return spawn_higher_lvl_node(left,right,LIST);
     }
     return left;
+}
+
+void freeAST(ASTnode * root){
+    if(!root) { return; }
+    if(root->type == COMMAND){
+        free(root->command);
+        free(root);
+        return;
+    }
+    freeAST(root->left);
+    freeAST(root->right);
+    free(root);
 }
