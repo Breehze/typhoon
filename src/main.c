@@ -1,9 +1,9 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <netinet/in.h>
+#include <sys/poll.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <string.h>
 #include <poll.h>
 #include <pty.h>
 #include <termios.h>
@@ -37,7 +37,7 @@ ChildProcessInfo spawnPTY(Error *err){
         t.c_cc[VTIME] = 0;  
         tcsetattr(STDIN_FILENO, TCSANOW, &t);
         run_shell();
-        _exit(EXIT_FAILURE);
+        exit(0);
     }
     return (ChildProcessInfo){.pid = pid,.master_fd = master_fd};
 }
@@ -74,7 +74,7 @@ int main() {
                 fd_to_conn[client_fd] = new_client;
                 fd_to_conn[new_client->pty_fd] = new_client;    
             
-            } else if (event & POLLIN) {
+            } else if (event & (POLLIN | POLLHUP) ) {
                 Connection * conn = fd_to_conn[fd];
                 char * buffer = (fd == conn->socket_fd) ? conn->socket_buffer : conn->pty_buffer;
                 int read_b = read(fd,buffer,1024);
@@ -90,7 +90,7 @@ int main() {
                 }else if(fd == conn->socket_fd){
                     write(conn->pty_fd,conn->socket_buffer,read_b);
                 }
-            }
+            }        
         }
         
         for(int i = fdset.len - 1; i >= 0;i--){
@@ -102,7 +102,7 @@ int main() {
                 int other_fd = (conn->socket_fd == fd ) ?  conn->pty_fd : conn->socket_fd ;
 
                 fdset_remove(&fdset,fd);
-
+                
                 if(fd_to_conn[other_fd]){
                     continue;
                 }
