@@ -13,7 +13,7 @@ PORT = 8080
 
 def get_terminal_size():
     rows, cols, _, _ = struct.unpack('HHHH',
-        fcntl.ioctl(sys.stdout.fileno(), termios.TIOCGWINSZ, b'\x00' * 8))
+    fcntl.ioctl(sys.stdout.fileno(), termios.TIOCGWINSZ, b'\x00' * 8))
     return rows, cols
 
 def main():

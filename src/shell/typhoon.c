@@ -13,6 +13,7 @@ struct tm * getCurrTime(){
     return time;
 }
 
+
 char * getUsername(){
     uid_t uid = geteuid();
     struct passwd *pw = getpwuid(uid);
@@ -20,16 +21,18 @@ char * getUsername(){
     return pw->pw_name;  
 }
 
+
 char * getCwd(char * buffer,size_t buffer_size){
     return getcwd(buffer,buffer_size);
 }
+
 
 void run_shell(){
     char buffer[1024] = {0};
     char cwd_buff[1024] = {0};
     int pos = 0;
     struct tm * time = getCurrTime();
-    fprintf(stdout,"%d:%d %s %s>",time->tm_hour,time->tm_min,getUsername(),getCwd(cwd_buff,sizeof(cwd_buff)));
+    fprintf(stdout,"\x1b[30m\x1b[41m%d:%d◥\x1b[0m %s ➤  ",time->tm_hour,time->tm_min,getUsername());
     fflush(stdout);
     while(0xB00BA){
         char c;

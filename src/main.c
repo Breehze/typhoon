@@ -12,6 +12,8 @@
 #include "shell/typhoon.h"
 #include "shell/parser/types.h"
 
+#include "terminal/terminal.h"
+
 #include "networking/utils/utils.h"
 #include "networking/connection/connection.h"
 #include "networking/fdset/fdset.h"
@@ -30,12 +32,7 @@ ChildProcessInfo spawnPTY(Error *err){
     
     if(pid == 0){
         setenv("TERM", "xterm-256color", 1);
-        struct termios t;
-        tcgetattr(STDIN_FILENO, &t);
-        t.c_lflag &= ~(ECHO | ICANON);  
-        t.c_cc[VMIN] = 1;   
-        t.c_cc[VTIME] = 0;  
-        tcsetattr(STDIN_FILENO, TCSANOW, &t);
+        terminal_setup();
         run_shell();
         exit(0);
     }
@@ -44,6 +41,7 @@ ChildProcessInfo spawnPTY(Error *err){
 
 
 int main() {  
+    terminal_setup();
     int client_fd;
     int server_fd = server_listen(8080);
 
@@ -51,6 +49,14 @@ int main() {
     fdset_init(&fdset);
 
     fdset_add(&fdset,server_fd,POLLIN);
+
+    Connection * server_conn = spawnConnection(0);
+    ChildProcessInfo server_pty = spawnPTY(NULL);
+    server_conn->pty_fd = server_pty.master_fd;
+    fdset_add(&fdset,0,POLLIN);
+    fdset_add(&fdset,server_pty.master_fd,POLLIN);
+    fd_to_conn[0] = server_conn;
+    fd_to_conn[server_pty.master_fd] = server_conn;
     
     while(0xB00BA){
         poll(fdset.descriptors,fdset.len,-1);
