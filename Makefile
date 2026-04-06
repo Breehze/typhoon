@@ -1,6 +1,6 @@
 CC := gcc
-CFLAGS := -Wall -Wextra -g -Isrc
-LDFLAGS := -lutil
+CFLAGS := -Wall -Wextra -g -Isrc -fsanitize=address -fsanitize=undefined
+LDFLAGS := -lutil -fsanitize=address
 
 SRC_DIR := src
 BUILD_DIR := build

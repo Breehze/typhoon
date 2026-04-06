@@ -29,7 +29,7 @@ ChildProcessInfo spawnPTY(Error *err){
     int status;
 
     if(pid == -1) { return (ChildProcessInfo){.pid = pid,.master_fd = -1}; }
-    
+
     if(pid == 0){
         setenv("TERM", "xterm-256color", 1);
         terminal_setup();
@@ -40,10 +40,9 @@ ChildProcessInfo spawnPTY(Error *err){
 }
 
 
-int main() {  
+int main() {
     terminal_setup();
-    int client_fd;
-    int server_fd = server_listen(8080);
+    int server_fd = server_listen_UDS("/tmp/typhoon.sock");//server_listen(8080);
 
     FileDescriptorSet fdset;
     fdset_init(&fdset);
@@ -61,11 +60,11 @@ int main() {
     while(0xB00BA){
         poll(fdset.descriptors,fdset.len,-1);
         int fdset_len_snapshot = fdset.len;
-        
+
         for(int i = 0; i < fdset_len_snapshot ;i++){
             int fd = fdset.descriptors[i].fd;
             short event = fdset.descriptors[i].revents;
-            
+
             if(fd == server_fd && event & POLLIN){
                 int client_fd = accept(server_fd,NULL,NULL);
                 ChildProcessInfo pty_info = spawnPTY(NULL);
@@ -73,13 +72,13 @@ int main() {
                 Connection * new_client = spawnConnection(client_fd);
                 new_client->pty_fd = pty_info.master_fd;
                 new_client->child_pid = pty_info.pid;
-                
+
                 fdset_add(&fdset,client_fd,POLLIN);
                 fdset_add(&fdset,pty_info.master_fd,POLLIN);
-                
+
                 fd_to_conn[client_fd] = new_client;
-                fd_to_conn[new_client->pty_fd] = new_client;    
-            
+                fd_to_conn[new_client->pty_fd] = new_client;
+
             } else if (event & (POLLIN | POLLHUP) ) {
                 Connection * conn = fd_to_conn[fd];
                 char * buffer = (fd == conn->socket_fd) ? conn->socket_buffer : conn->pty_buffer;
@@ -96,9 +95,9 @@ int main() {
                 }else if(fd == conn->socket_fd){
                     write(conn->pty_fd,conn->socket_buffer,read_b);
                 }
-            }        
+            }
         }
-        
+
         for(int i = fdset.len - 1; i >= 0;i--){
             Connection * conn = fd_to_conn[fdset.descriptors[i].fd];
             int fd = fdset.descriptors[i].fd;
@@ -108,7 +107,7 @@ int main() {
                 int other_fd = (conn->socket_fd == fd ) ?  conn->pty_fd : conn->socket_fd ;
 
                 fdset_remove(&fdset,fd);
-                
+
                 if(fd_to_conn[other_fd]){
                     continue;
                 }
@@ -118,10 +117,9 @@ int main() {
                     waitpid(conn->child_pid, NULL, WNOHANG);
                 }
 
-                free(conn);      
+                free(conn);
             }
-        };       
-    }  
+        };
+    }
     return 0;
 }
-

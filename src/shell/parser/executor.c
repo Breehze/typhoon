@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <signal.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -36,13 +37,13 @@ void execute_commnad(char ** tokenized_path,Error *err){
         return;
     }
     if(strcmp(*tokenized_path,"help") == 0){
-        printf("This shell belongs to Boris\n");
+        printf("This shell was implemented as a part of SPAASM FIIT Course.\nAuthor of this program is Boris Ftorek.\n");
         return;
     }else if(strcmp(*tokenized_path,"quit") == 0){
         exit(0);
         return;
     }else if(strcmp(*tokenized_path,"halt") == 0){
-        //signal to parent to killitself
+        return;
     }else if(strcmp(*tokenized_path,"cd") == 0){
         if(tokenized_path[1] == NULL){
             return;
