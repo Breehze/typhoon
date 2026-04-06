@@ -5,8 +5,8 @@ LDFLAGS := -lutil -fsanitize=address
 SRC_DIR := src
 BUILD_DIR := build
 
-# Find all .c files in src and its subdirectories
-SRCS := $(shell find $(SRC_DIR) -name "*.c")
+# Find all .c files in src and its subdirectories, excluding the client directory
+SRCS := $(shell find $(SRC_DIR) -not -path "$(SRC_DIR)/client/*" -name "*.c")
 # Convert .c files to .o files in the build directory
 OBJS := $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
 

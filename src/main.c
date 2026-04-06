@@ -42,7 +42,7 @@ ChildProcessInfo spawnPTY(Error *err){
 
 int main() {
     terminal_setup();
-    int server_fd = server_listen_UDS("/tmp/typhoon.sock");//server_listen(8080);
+    int server_fd = server_listen(8080);
 
     FileDescriptorSet fdset;
     fdset_init(&fdset);
