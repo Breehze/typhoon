@@ -1,12 +1,12 @@
 CC := gcc
 CFLAGS := -Wall -Wextra -g -Isrc -fsanitize=address -fsanitize=undefined
-LDFLAGS := -lutil -fsanitize=address
+LDFLAGS := -lutil -fsanitize=address,undefined,leak
 
 SRC_DIR := src
 BUILD_DIR := build
 
 # Find all .c files in src and its subdirectories, excluding the client directory
-SRCS := $(shell find $(SRC_DIR) -not -path "$(SRC_DIR)/client/*" -name "*.c")
+SRCS := $(shell find $(SRC_DIR) -name "*.c")
 # Convert .c files to .o files in the build directory
 OBJS := $(SRCS:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
 

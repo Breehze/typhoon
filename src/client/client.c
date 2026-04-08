@@ -13,7 +13,8 @@
 #include "../networking/utils/utils.h"
    
 
-int main(void){
+void run_client(char * ip_addr,short int port,char * unix_socket_path){
+    int serv_socket = -1;
     terminal_setup();
     char out_buffer[1024] = {0};
     char in_buffer[1024] = {0};
@@ -21,13 +22,20 @@ int main(void){
     FileDescriptorSet fdset;
     fdset_init(&fdset);
     
-    int serv_socket = connect_TCP("127.0.0.1",8080);
+    if(unix_socket_path){    
+        serv_socket = connect_UDS(unix_socket_path);
+    }else{
+        serv_socket = connect_TCP(ip_addr,port);
+    }
+    
     if(serv_socket < 3){
         printf("[ERR] Could not connect to server!\n");
+        fdset_clean(&fdset);
         exit(1);
     }
     fdset_add(&fdset,0,POLLIN);
     fdset_add(&fdset,serv_socket,POLLIN);
+    
     while(0xB00BA){
         poll(fdset.descriptors,fdset.len,-1);
         for(int i = 0;i < fdset.len;i++){

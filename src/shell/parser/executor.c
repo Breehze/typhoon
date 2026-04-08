@@ -11,6 +11,7 @@
 #include "lexer.h"
 #include "types.h"
 #include "parser.h"
+#include "../../terminal/terminal.h"
 
 void execute_pipe(ASTnode* node);
 
@@ -37,7 +38,7 @@ void execute_commnad(char ** tokenized_path,Error *err){
         return;
     }
     if(strcmp(*tokenized_path,"help") == 0){
-        printf("This shell was implemented as a part of SPAASM FIIT Course.\nAuthor of this program is Boris Ftorek.\n");
+        print_usage("typhoon");
         return;
     }else if(strcmp(*tokenized_path,"quit") == 0){
         exit(0);
