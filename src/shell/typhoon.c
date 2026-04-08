@@ -27,16 +27,25 @@ char * getCwd(char * buffer,size_t buffer_size){
 }
 
 
+void getHostName(char * buffer,size_t buffer_size){
+    gethostname(buffer,buffer_size);
+}
+
+
 void run_shell(){
     char buffer[1024] = {0};
     char cwd_buff[1024] = {0};
+    char host_name_buffer[512] = {0};
     int pos = 0;
     struct tm * time = getCurrTime();
-    fprintf(stdout,"\x1b[30m\x1b[41m%d:%d◥\x1b[0m %s ➤  ",time->tm_hour,time->tm_min,getUsername());
+    getHostName(host_name_buffer,sizeof(host_name_buffer));
+    fprintf(stdout,"\x1b[30m\x1b[41m%d:%d◥\x1b[0m %s@%s ➤  ",time->tm_hour,time->tm_min,getUsername(),host_name_buffer);
     fflush(stdout);
     while(0xB00BA){
         char c;
         time = getCurrTime();
+        getHostName(host_name_buffer,sizeof(host_name_buffer));
+        
         int n = read(0, &c, 1);
         if(n <= 0) break;
 
@@ -48,7 +57,7 @@ void run_shell(){
             }
             pos = 0;
             memset(buffer, 0, sizeof(buffer));
-            fprintf(stdout,"\x1b[30m\x1b[41m%d:%d◥\x1b[0m %s ➤  ",time->tm_hour,time->tm_min,getUsername());
+            fprintf(stdout,"\x1b[30m\x1b[41m%d:%d◥\x1b[0m %s@%s ➤  ",time->tm_hour,time->tm_min,getUsername(),host_name_buffer);
             fflush(stdout);
         } else if(c == 127 || c == '\b'){
             if(pos > 0){
