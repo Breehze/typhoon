@@ -44,6 +44,9 @@ void execute_commnad(char ** tokenized_path,Error *err){
         exit(0);
         return;
     }else if(strcmp(*tokenized_path,"halt") == 0){
+        pid_t parent = getppid();
+        if(parent == 1){ return; }
+        kill(parent,SIGINT);
         return;
     }else if(strcmp(*tokenized_path,"cd") == 0){
         if(tokenized_path[1] == NULL){

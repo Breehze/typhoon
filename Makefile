@@ -1,5 +1,5 @@
 CC := gcc
-CFLAGS := -Wall -Wextra -g -Isrc -fsanitize=address -fsanitize=undefined
+CFLAGS := -Wall -Wextra -g -Isrc -fsanitize=address -fsanitize=undefined -fsanitize=leak
 LDFLAGS := -lutil -fsanitize=address,undefined,leak
 
 SRC_DIR := src

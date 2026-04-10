@@ -8,6 +8,7 @@
 #include <pty.h>
 #include <termios.h>
 #include <stdio.h>
+#include <signal.h>
 
 #include "../shell/typhoon.h"
 #include "../shell/parser/types.h"
@@ -21,7 +22,7 @@
 #define FD_MAP_SIZE 4096
 
 Connection * fd_to_conn[FD_MAP_SIZE] = {0};
-
+volatile sig_atomic_t quit_sig = 0;
 
 ChildProcessInfo spawnPTY(Error *err){
     int master_fd;
@@ -39,8 +40,44 @@ ChildProcessInfo spawnPTY(Error *err){
     return (ChildProcessInfo){.pid = pid,.master_fd = master_fd};
 }
 
+void quit(int sig){
+   quit_sig = 1;
+}
+
+void cleanup_disconnects(FileDescriptorSet * fdset){
+    for(int i = fdset->len - 1; i >= 0;i--){
+        Connection * conn = fd_to_conn[fdset->descriptors[i].fd];
+        int fd = fdset->descriptors[i].fd;
+        if(conn && conn->remove){
+            fd_to_conn[fd] = NULL;
+    
+            int other_fd = (conn->socket_fd == fd ) ?  conn->pty_fd : conn->socket_fd ;
+    
+            fdset_remove(fdset,fd);
+    
+            if(fd_to_conn[other_fd]){
+                continue;
+            }
+    
+            if(conn->child_pid > 0){
+                kill(conn->child_pid, SIGTERM);
+                waitpid(conn->child_pid, NULL, WNOHANG);
+            }
+    
+            free(conn);
+        }
+    };
+}
+
+void cleanup(FileDescriptorSet * fdset){
+    cleanup_disconnects(fdset);
+    fdset_clean(fdset);
+    exit(0);
+}
+
 
 int run_server(char * ip_addr, short int port, char * unix_socket_path) {
+    signal(SIGINT,quit);
     terminal_setup();
     int server_fd;
     if((!ip_addr || port == -1) && !unix_socket_path){
@@ -68,7 +105,7 @@ int run_server(char * ip_addr, short int port, char * unix_socket_path) {
     fd_to_conn[server_pty.master_fd] = server_conn;
     
     while(0xB00BA){
-        poll(fdset.descriptors,fdset.len,-1);
+        poll(fdset.descriptors,fdset.len,500);
         int fdset_len_snapshot = fdset.len;
 
         for(int i = 0; i < fdset_len_snapshot ;i++){
@@ -107,29 +144,12 @@ int run_server(char * ip_addr, short int port, char * unix_socket_path) {
                 }
             }
         }
-
-        for(int i = fdset.len - 1; i >= 0;i--){
-            Connection * conn = fd_to_conn[fdset.descriptors[i].fd];
-            int fd = fdset.descriptors[i].fd;
-            if(conn && conn->remove){
-                fd_to_conn[fd] = NULL;
-
-                int other_fd = (conn->socket_fd == fd ) ?  conn->pty_fd : conn->socket_fd ;
-
-                fdset_remove(&fdset,fd);
-
-                if(fd_to_conn[other_fd]){
-                    continue;
-                }
-
-                if(conn->child_pid > 0){
-                    kill(conn->child_pid, SIGTERM);
-                    waitpid(conn->child_pid, NULL, WNOHANG);
-                }
-
-                free(conn);
-            }
-        };
+        
+        cleanup_disconnects(&fdset);
+        
+        if(quit_sig){
+            cleanup(&fdset);
+        }
     }
     return 0;
 }
