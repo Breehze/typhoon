@@ -81,7 +81,7 @@ void cleanup(FileDescriptorSet * fdset){
 }
 
 
-int run_server(char * ip_addr, short int port, char * unix_socket_path) {
+int run_server(char * ip_addr, short int port, char * unix_socket_path,time_t conn_timeout) {
     signal(SIGINT,quit);
     terminal_setup();
     int server_fd;
@@ -147,9 +147,11 @@ int run_server(char * ip_addr, short int port, char * unix_socket_path) {
                 }else if(fd == conn->socket_fd){
                     write(conn->pty_fd,conn->socket_buffer,read_b);
                 }
+                updateActivity(conn);
             }
         }
         
+        flagInactive(fd_to_conn,FD_MAP_SIZE,conn_timeout);
         cleanup_disconnects(&fdset);
         
         if(quit_sig){

@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "client/client.h"
 #include "server/server.h"
@@ -16,6 +17,7 @@ int main(int argc,char *argv[]){
     char * ip = "127.0.0.1";
     short int port = -1;
     char * unix_socket = NULL;
+    time_t timeout = 120;
     
     static struct option long_options[] = {
         {"help", no_argument, 0,'h'},
@@ -24,11 +26,12 @@ int main(int argc,char *argv[]){
         {"ipaddr",required_argument,0,'i'},
         {"server",no_argument,0,'s'},
         {"client",no_argument,0,'c'},
+        {"timeout",required_argument,0,'t'},
         {0, 0, 0, 0}
     };
     
     char c;
-    while ((c = getopt_long(argc, argv, "hu:p:i:sc", long_options, NULL)) != -1) {
+    while ((c = getopt_long(argc, argv, "hu:p:i:sct:", long_options, NULL)) != -1) {
         switch (c) {
             case 'h':
                 print_usage("typhoon");
@@ -48,6 +51,9 @@ int main(int argc,char *argv[]){
             case 'u':
                 unix_socket = strdup(optarg);
                 break;
+            case 't':
+                timeout = atoi(optarg);
+                break;
             case '?':
                 break;
         }
@@ -62,7 +68,7 @@ int main(int argc,char *argv[]){
             printf("Please select a port to run on!");
             return 1;
         }
-        run_server(ip,port,unix_socket);
+        run_server(ip,port,unix_socket,timeout);
     }else if(mode == CLIENT){
         if(port == -1 && !unix_socket){
             printf("Please select a port to run on!");
