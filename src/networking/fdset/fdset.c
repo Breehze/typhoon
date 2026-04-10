@@ -40,6 +40,9 @@ void fdset_remove(FileDescriptorSet *fdset, int fd) {
 
 
 void fdset_clean(FileDescriptorSet * fdset){
+    for(int i = 0; i < fdset->len; i++){
+        close(fdset->descriptors[i].fd);
+    }
     free(fdset->descriptors);
     fdset->capacity = 0;
     fdset->len = 0;

@@ -70,6 +70,11 @@ void cleanup_disconnects(FileDescriptorSet * fdset){
 }
 
 void cleanup(FileDescriptorSet * fdset){
+    for (int i = 0; i < FD_MAP_SIZE; i++) {
+        if (fd_to_conn[i]) {
+            fd_to_conn[i]->remove = 1;
+        }
+    }
     cleanup_disconnects(fdset);
     fdset_clean(fdset);
     exit(0);
