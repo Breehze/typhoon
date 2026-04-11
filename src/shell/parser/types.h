@@ -21,7 +21,11 @@ typedef enum{
 typedef struct ASTnode{
     ASTnodeType type;
     union {
-        char ** command; 
+        struct {
+            char ** command;
+            char * input_file;
+            char * output_file;
+        };
         struct {
             struct ASTnode *left;
             struct ASTnode *right;

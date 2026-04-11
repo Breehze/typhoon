@@ -43,6 +43,6 @@ def main():
     finally:
         termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
         sock.close()
-
+    
 if __name__ == '__main__':
     main()

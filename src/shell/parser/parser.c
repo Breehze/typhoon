@@ -65,7 +65,7 @@ ASTnode * spawn_higher_lvl_node(ASTnode * left,ASTnode * right, ASTnodeType type
 }
 
 
-ASTnode * spawn_command_node(char ** command){
+ASTnode * spawn_command_node(char ** command,char * input, char * output){
     if(!command) { return NULL;}
         
     ASTnode * newNode = (ASTnode*)malloc(sizeof(ASTnode));
@@ -74,21 +74,35 @@ ASTnode * spawn_command_node(char ** command){
     *newNode = (ASTnode){
         .type = COMMAND,
         .command = command,
+        .input_file = input,
+        .output_file = output
     };
     return newNode;
 }
 
 
 ASTnode * parse_command(char *** token_stream){
+    char * input = NULL;
+    char * output = NULL;
     char ** whole_command = (char **)malloc(20 * sizeof(char *));
     int i = 0;
     
     while(peek(*token_stream) != NULL && strcmp(peek(*token_stream),"|") != 0 && strcmp(peek(*token_stream),";") != 0){
-        whole_command[i++] = consume(token_stream);
+        char * token = consume(token_stream);
+        if(strcmp(token,">") == 0){
+            if(!peek(*token_stream)){ free(whole_command) ; return NULL;}
+            output = consume(token_stream);
+        }else if(strcmp(token,"<") == 0){
+            if(!peek(*token_stream)){ free(whole_command) ; return NULL;}
+            input = consume(token_stream);
+        }else{
+            whole_command[i++] = token;
+        }
+        
     }
     whole_command[i] = NULL;
 
-    return spawn_command_node(whole_command); 
+    return spawn_command_node(whole_command,input,output); 
 }
 
 
