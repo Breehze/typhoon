@@ -71,6 +71,7 @@ int main(int argc,char *argv[]){
     }else if(mode == CLIENT){
         if(port == -1 && !unix_socket){
             printf("Please select a port to run on!");
+            return 1;
         }
         run_client(ip,port,unix_socket);
     }
