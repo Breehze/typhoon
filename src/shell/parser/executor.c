@@ -18,9 +18,7 @@ void execute_pipe(ASTnode* node);
 
 
 void run_process(ASTnode * node,Error *err){
-    int master_fd;
     pid_t pid = fork();
-    int status;
 
     if(pid == -1) { return; }
     
@@ -119,6 +117,7 @@ void execute_pipe(ASTnode *node) {
 
 
  void executor_exec(char *string, Error * err){
+    (void)err;
     char ** tokens_original = tokenize(string);
     char ** tokens = tokens_original;
     

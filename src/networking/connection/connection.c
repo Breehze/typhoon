@@ -20,7 +20,7 @@ Connection * spawnConnection(int socket_fd){
 
 void flagInactive(Connection ** connections,size_t arr_size,time_t delta){
     time_t snapshot_now = time(NULL);
-    for(int i = 0;i < arr_size;i++){
+    for(size_t i = 0;i < arr_size;i++){
         if(!connections[i]){ continue; }
         if(snapshot_now > connections[i]->last_ping + delta){
             printf("Removing a connection\n");

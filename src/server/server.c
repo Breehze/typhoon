@@ -25,9 +25,9 @@ Connection * fd_to_conn[FD_MAP_SIZE] = {0};
 volatile sig_atomic_t quit_sig = 0;
 
 ChildProcessInfo spawnPTY(Error *err){
+    (void)err;
     int master_fd;
     pid_t pid = forkpty(&master_fd,NULL,NULL,NULL);
-    int status;
 
     if(pid == -1) { return (ChildProcessInfo){.pid = pid,.master_fd = -1}; }
 
@@ -41,6 +41,7 @@ ChildProcessInfo spawnPTY(Error *err){
 }
 
 void quit(int sig){
+   (void)sig;
    quit_sig = 1;
 }
 
@@ -92,7 +93,7 @@ int run_server(char * ip_addr, short int port, char * unix_socket_path,time_t co
     if(unix_socket_path){
         server_fd = server_listen_UDS(unix_socket_path);
     }else{
-        server_fd = server_listen(port);
+        server_fd = server_listen(ip_addr, port);
     }
         
 

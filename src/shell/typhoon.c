@@ -34,7 +34,6 @@ void getHostName(char * buffer,size_t buffer_size){
 
 void run_shell(){
     char buffer[1024] = {0};
-    char cwd_buff[1024] = {0};
     char host_name_buffer[512] = {0};
     int pos = 0;
     struct tm * time = getCurrTime();

@@ -59,8 +59,7 @@ int main(int argc,char *argv[]){
         }
     }
     if(!mode){
-        printf("Please specify operation mode, check -h for help\n");
-        return 0;
+        mode = SERVER;
     }
     
     if(mode == SERVER){
