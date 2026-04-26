@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,9 +37,17 @@ int main(int argc,char *argv[]){
             case 'h':
                 print_usage("typhoon");
                 return 0;
-            case 'p':
-                port = atoi(optarg);
+            case 'p': {
+                char *endptr;
+                errno = 0;
+                long val = strtol(optarg, &endptr, 10);
+                if (errno != 0 || *endptr != '\0' || val < 1 || val > 65535) {
+                    fprintf(stderr, "Invalid port: %s\n", optarg);
+                    return 1;
+                }
+                port = (short)val;
                 break;
+            }
             case 'i':
                 ip = strdup(optarg);
                 break;
@@ -51,9 +60,17 @@ int main(int argc,char *argv[]){
             case 'u':
                 unix_socket = strdup(optarg);
                 break;
-            case 't':
-                timeout = atoi(optarg);
+            case 't': {
+                char *endptr;
+                errno = 0;
+                long val = strtol(optarg, &endptr, 10);
+                if (errno != 0 || *endptr != '\0' || val < 1) {
+                    fprintf(stderr, "Invalid timeout: %s\n", optarg);
+                    return 1;
+                }
+                timeout = val;
                 break;
+            }
             case '?':
                 break;
         }
