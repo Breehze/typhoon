@@ -29,12 +29,18 @@ void fdset_add(FileDescriptorSet * fdset,int fd,int mode){
 
 
 void fdset_remove(FileDescriptorSet *fdset, int fd) {
-    int i;
-    for(i = 0;i<fdset->len;i++){
-        if(fdset->descriptors[i].fd == fd) break;
+    int fd_index = -1;
+    for(int i = 0;i<fdset->len;i++){
+        if(fdset->descriptors[i].fd == fd){
+            fd_index = i;
+            break;
+        }
     }
-    close(fdset->descriptors[i].fd);
-    fdset->descriptors[i] = fdset->descriptors[fdset->len - 1];
+    if(fd_index == -1){
+        return;
+    }
+    close(fdset->descriptors[fd_index].fd);
+    fdset->descriptors[fd_index] = fdset->descriptors[fdset->len - 1];
     fdset->len--;
 }
 
