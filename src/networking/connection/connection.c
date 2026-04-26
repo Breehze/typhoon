@@ -7,6 +7,7 @@
 
 Connection * spawnConnection(int socket_fd){
     Connection * newConnection = (Connection *)malloc(sizeof(Connection));
+    if(!newConnection) return NULL;
     *newConnection = (Connection){
         .socket_fd = socket_fd,
         .pty_fd = -1,

@@ -111,7 +111,7 @@ int run_server(char * ip_addr, short int port, char * unix_socket_path,time_t co
     fd_to_conn[server_pty.master_fd] = server_conn;
     
     while(0xB00BA){
-        poll(fdset.descriptors,fdset.len,500);
+        poll(fdset.descriptors,fdset.len,100);
         int fdset_len_snapshot = fdset.len;
 
         for(int i = 0; i < fdset_len_snapshot ;i++){
@@ -120,6 +120,9 @@ int run_server(char * ip_addr, short int port, char * unix_socket_path,time_t co
 
             if(fd == server_fd && event & POLLIN){
                 int client_fd = accept(server_fd,NULL,NULL);
+                if(client_fd == -1){
+                    continue;
+                }
                 ChildProcessInfo pty_info = spawnPTY(NULL);
 
                 Connection * new_client = spawnConnection(client_fd);

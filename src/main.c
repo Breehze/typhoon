@@ -31,7 +31,7 @@ int main(int argc,char *argv[]){
         {0, 0, 0, 0}
     };
     
-    char c;
+    int c;
     while ((c = getopt_long(argc, argv, "hu:p:i:sct:", long_options, NULL)) != -1) {
         switch (c) {
             case 'h':
