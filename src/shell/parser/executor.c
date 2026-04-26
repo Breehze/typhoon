@@ -35,8 +35,10 @@ void run_process(ASTnode * node,Error *err){
             dup2(fd, STDOUT_FILENO);
             close(fd);
         }
-        if(execvp(node->command[0],node->command) == -1 && err){
-            *err = SOME_ERROR;
+        if(execvp(node->command[0],node->command) == -1){
+            if(err)
+                *err = SOME_ERROR;
+            fprintf(stderr, "typhoon: %s: command not found or cannot execute\n", node->command[0]);
         }; 
         _exit(EXIT_FAILURE);
     }

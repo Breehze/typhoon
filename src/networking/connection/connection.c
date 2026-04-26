@@ -23,6 +23,7 @@ void flagInactive(Connection ** connections,size_t arr_size,time_t delta){
     time_t snapshot_now = time(NULL);
     for(size_t i = 0;i < arr_size;i++){
         if(!connections[i]){ continue; }
+        if(connections[i]->socket_fd == 0) continue;
         if(snapshot_now > connections[i]->last_ping + delta){
             connections[i]->remove = 1;
         }
